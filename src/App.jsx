@@ -56,6 +56,7 @@ function App() {
   const [originalImage, setOriginalImage] = useState(null);
   const [showOriginal, setShowOriginal] = useState(false);
   const [error, setError] = useState('');
+  const [isEnhancing, setIsEnhancing] = useState(false);
 
   const toggleEnhancer = (id) => {
     setActiveEnhancers(prev => 
@@ -74,7 +75,12 @@ function App() {
     setOriginalImage(remaining.length > 0 ? remaining[0].preview : null);
   };
 
-  const handleGenerate = async () => {
+  const handleEnhancePixels = () => {
+    setIsEnhancing(true);
+    handleGenerate(true);
+  };
+
+  const handleGenerate = async (isEnhancePass = false) => {
     const preset = MATTE_PRESETS.find(s => s.id === selectedPreset);
     const enhancerTexts = activeEnhancers.map(id => ENHANCERS.find(e => e.id === id).value).join(', ');
     
@@ -86,6 +92,7 @@ function App() {
       The product must be 100% identical to the source asset.
       ${!isBackgroundRequested ? 'STRICT: Keep the original background of the source image exactly as it is. Do not modify the environment.' : 'TRANSFORM: Synthesize a professional background as requested while keeping the product identical.'}
       QUALITY: Output MUST be Pixel-Perfect Ultra High Definition (UHD+), 8k resolution, razor-sharp clarity, no artifacts, highly rendered with realistic textures, ray-tracing, and PBR shaders. Use professional advertising photography standards.
+      ${isEnhancePass ? 'ENHANCEMENT: Finalize with extreme supersampling, hyper-realistic micro-textures, and high-frequency detail refinement. Eliminate all aliasing and noise.' : ''}
     `.trim();
 
     const finalPrompt = `
@@ -95,6 +102,7 @@ function App() {
       Technical Enhancements: ${enhancerTexts}
     `.trim();
 
+    if (!isEnhancePass) setIsEnhancing(false);
     setLoading(true);
     setError('');
     setShowOriginal(false);
@@ -217,10 +225,10 @@ function App() {
               </div>
               <button 
                 className="btn-matrix-trigger artist-generate" 
-                onClick={handleGenerate} 
+                onClick={() => handleGenerate(false)} 
                 disabled={loading}
               >
-                {loading ? 'PROCESSING ART...' : 'GENERATE IMAGE'}
+                {loading ? (isEnhancing ? 'ENHANCING PIXELS...' : 'PROCESSING ART...') : 'GENERATE IMAGE'}
               </button>
             </div>
           </div>
@@ -256,6 +264,13 @@ function App() {
                     onMouseLeave={() => setShowOriginal(false)}
                   >
                     ORIGINAL FREQUENCY
+                  </button>
+                  <button 
+                    className={`btn-matrix-mode enhance-pixels-btn ${isEnhancing ? 'loading' : ''}`}
+                    onClick={handleEnhancePixels}
+                    disabled={loading}
+                  >
+                    ✨ ENHANCE PIXELS
                   </button>
                   <button className="btn-matrix-download" onClick={() => {
                     const link = document.createElement('a');
