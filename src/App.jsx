@@ -8,32 +8,32 @@ const MATTE_PRESETS = [
   { 
     id: 'clinical-matte', 
     label: '🧴 Soft Matte Clinic', 
-    prompt: 'Professional medical product photography, 8k resolution, ultra HD, highly detailed textures, soft diffused natural lighting, minimal shadows, matte surface finish, high-end designer clinical aesthetic, pastel gray background.' 
+    prompt: 'Professional medical product photography, 8k resolution, ultra HD, pixel-perfect clarity, razor-sharp details, highly rendered textures, soft diffused natural lighting, minimal shadows, matte surface finish, high-end designer clinical aesthetic, pastel gray background.' 
   },
   { 
     id: 'cinematic-hero', 
     label: '🏆 Cinematic Hero 3D', 
-    prompt: 'Ultra HD 3D cinematic hero shot, 8k resolution, highly rendered textures, ray-tracing reflections, Physically Based Rendering (PBR), dramatic medical lighting, soft rim highlights, Octane render aesthetic.' 
+    prompt: 'Ultra HD 3D cinematic hero shot, 8k resolution, pixel-perfect precision, highly rendered textures, ray-tracing reflections, Physically Based Rendering (PBR), dramatic medical lighting, soft rim highlights, Octane render aesthetic, extreme detail.' 
   },
   { 
     id: 'catalog-white', 
     label: '🛒 Pure White Catalog', 
-    prompt: 'Standard e-commerce listing on a solid pure white background (#FFFFFF). Ultra HD, high fidelity, professional color grading, clean shadows, sharp product details.' 
+    prompt: 'Standard e-commerce listing on a solid pure white background (#FFFFFF). Ultra HD, pixel-perfect, zero noise, high fidelity, professional color grading, clean shadows, sharp product details.' 
   },
   { 
     id: 'studio-pastel', 
     label: '🎨 Pastel Designer', 
-    prompt: 'Premium studio product shot, ultra HD, 8k resolution, soft pastel secondary light, elegant minimalist composition, clean transitions, matte textures, commercial high-fidelity ray-traced render.' 
+    prompt: 'Premium studio product shot, ultra HD, 8k resolution, pixel-perfect rendering, soft pastel secondary light, elegant minimalist composition, clean transitions, matte textures, commercial high-fidelity ray-traced render.' 
   },
   { 
     id: 'industrial-3d', 
     label: '🏗️ Industrial 3D Studio', 
-    prompt: 'Clean industrial 3D render, ultra HD, 8k, Unreal Engine 5 render style, sharp focus, octane render output, high-fidelity mechanical details, professional studio setup.' 
+    prompt: 'Clean industrial 3D render, ultra HD, 8k, pixel-perfect sharpness, Unreal Engine 5 render style, sharp focus, octane render output, high-fidelity mechanical details, professional studio setup.' 
   },
   { 
     id: 'macro-detail', 
     label: '🔍 Macro Precision', 
-    prompt: 'Extreme close-up macro shot, ultra HD resolution, 8k, soft clinical focus, high-tech metallic matte finish, sharp intricate details, professional dentistry photography.' 
+    prompt: 'Extreme close-up macro shot, ultra HD resolution, 8k, pixel-perfect focus, soft clinical focus, high-tech metallic matte finish, sharp intricate details, professional dentistry photography.' 
   },
 ];
 
@@ -85,7 +85,7 @@ function App() {
       Do not alter structural geometry, branding, text, or functional details of the product.
       The product must be 100% identical to the source asset.
       ${!isBackgroundRequested ? 'STRICT: Keep the original background of the source image exactly as it is. Do not modify the environment.' : 'TRANSFORM: Synthesize a professional background as requested while keeping the product identical.'}
-      QUALITY: Output MUST be Ultra High Definition (UHD), 8k resolution, highly rendered with realistic textures, ray-tracing, and PBR shaders. Use professional photography standards.
+      QUALITY: Output MUST be Pixel-Perfect Ultra High Definition (UHD+), 8k resolution, razor-sharp clarity, no artifacts, highly rendered with realistic textures, ray-tracing, and PBR shaders. Use professional advertising photography standards.
     `.trim();
 
     const finalPrompt = `

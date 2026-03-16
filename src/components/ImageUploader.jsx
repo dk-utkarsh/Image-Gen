@@ -3,21 +3,57 @@ import React, { useState } from 'react';
 const ImageUploader = ({ onImagesAdd }) => {
   const [isDragging, setIsDragging] = useState(false);
 
-  const processFiles = (files) => {
-    Array.from(files).forEach(file => {
+  const compressImage = (file) => {
+    return new Promise((resolve) => {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64Data = reader.result.split(',')[1];
-        onImagesAdd({
-          id: Math.random().toString(36).substr(2, 9),
-          preview: reader.result,
-          data: base64Data,
-          type: file.type,
-          name: file.name
-        });
-      };
       reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target.result;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          
+          // Max dimension for reference
+          const MAX_SIZE = 1024;
+          if (width > height) {
+            if (width > MAX_SIZE) {
+              height *= MAX_SIZE / width;
+              width = MAX_SIZE;
+            }
+          } else {
+            if (height > MAX_SIZE) {
+              width *= MAX_SIZE / height;
+              height = MAX_SIZE;
+            }
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          // Compress to JPEG for smaller payload
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+          resolve(dataUrl);
+        };
+      };
     });
+  };
+
+  const processFiles = async (files) => {
+    for (const file of Array.from(files)) {
+      const compressedDataUrl = await compressImage(file);
+      const base64Data = compressedDataUrl.split(',')[1];
+      onImagesAdd({
+        id: Math.random().toString(36).substr(2, 9),
+        preview: compressedDataUrl,
+        data: base64Data,
+        type: 'image/jpeg',
+        name: file.name
+      });
+    }
   };
 
   const handleFileChange = (e) => {
