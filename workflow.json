@@ -1,0 +1,283 @@
+{
+  "name": "Image Editing Ai With CHAT GPT & PRO AI",
+  "nodes": [
+    {
+      "parameters": {
+        "name": "={{ $('Form Trigger').item.json['Prompt'].replace(/[^a-zA-Z0-9 ]/g, '').replace(/\\s+/g, '_').substring(0, 50) }}_{{ $itemIndex + 1 }}_{{ new Date().toISOString().replace(/[-:T]/g, '').substring(0, 15) }}.jpeg",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "https://drive.google.com/drive/u/0/folders/1iDFbelO1XioRE0LqK56J0xx2p-l8Yi6p",
+          "mode": "url"
+        },
+        "options": {
+          "keepRevisionForever": true
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1424,
+        -128
+      ],
+      "id": "e7068ede-cabc-4444-b2bf-e764e82d9564",
+      "name": "Upload file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "NI3H6NR1vzEKlor6",
+          "name": "Google Drive account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "formTitle": "AI Image Generator",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Upload Image",
+              "fieldType": "file",
+              "multipleFiles": false
+            },
+            {
+              "fieldLabel": "Prompt"
+            },
+            {
+              "fieldLabel": "Select a Default Prompt",
+              "fieldType": "radio",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Hero Image on white background"
+                  },
+                  {
+                    "option": "Cinematic Hero Shot 3D Render"
+                  }
+                ]
+              }
+            },
+            {
+              "fieldLabel": "Image Size",
+              "fieldType": "radio",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "1024x1024 (1:1)"
+                  },
+                  {
+                    "option": "1200x630 (custom)"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "options": {
+          "customCss": "/* =====================================================\n   ROOT VARIABLES - LABEL GENERATION FORM\n===================================================== */\n:root {\n  --font-family: 'Inter', 'Open Sans', system-ui, sans-serif;\n\n  --font-size-header: 22px;\n  --font-size-label: 14px;\n  --font-size-input: 14px;\n\n  --color-card-bg: rgba(255, 255, 255, 0.96);\n  --color-card-border: rgba(255, 255, 255, 0.18);\n  --color-card-shadow: rgba(0, 0, 0, 0.35);\n\n  --color-header: #0f172a;\n  --color-label: #334155;\n  --color-input-border: #cbd5e1;\n  --color-focus-border: #6366f1;\n\n  --color-submit-btn-bg: linear-gradient(135deg, #6366f1, #4f46e5);\n  --color-submit-btn-text: #ffffff;\n\n  --border-radius-card: 18px;\n  --border-radius-input: 12px;\n\n  --submit-btn-height: 52px;\n}\n\n/* =====================================================\n   PAGE BACKGROUND\n===================================================== */\nbody {\n  background: radial-gradient(circle at top, #1f3b44, #0b1f26 70%) !important;\n  font-family: var(--font-family);\n  min-height: 100vh;\n}\n\n/* =====================================================\n   BRAND NAME LIVE BACKGROUND (VASA DENTICITY)\n===================================================== */\nbody::before {\n  content: \"VASA DENTICITY   VASA DENTICITY   VASA DENTICITY   VASA DENTICITY\";\n  position: fixed;\n  top: 22%;\n  left: -60%;\n  width: 220%;\n  font-size: 72px;\n  font-weight: 800;\n  letter-spacing: 36px;\n  color: rgba(255, 255, 255, 0.035);\n  white-space: nowrap;\n  animation: brandFlow 80s linear infinite;\n  pointer-events: none;\n  z-index: 0;\n}\n\n@keyframes brandFlow {\n  from {\n    transform: translateX(0);\n  }\n  to {\n    transform: translateX(-50%);\n  }\n}\n\n/* =====================================================\n   FLOATING GRID PATTERN\n===================================================== */\nbody::after {\n  content: \"\";\n  position: fixed;\n  inset: 0;\n  background-image:\n    radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px);\n  background-size: 150px 150px;\n  animation: gridMove 50s linear infinite;\n  pointer-events: none;\n  z-index: 0;\n}\n\n@keyframes gridMove {\n  from { background-position: 0 0; }\n  to { background-position: 300px 300px; }\n}\n\n/* =====================================================\n   FORM CARD CONTAINER\n===================================================== */\n.n8n-card {\n  background: var(--color-card-bg) !important;\n  border-radius: var(--border-radius-card) !important;\n  box-shadow: 0px 25px 50px rgba(0, 0, 0, 0.4) !important;\n  border: 1px solid var(--color-card-border) !important;\n  backdrop-filter: blur(16px) !important;\n  animation: fadeUp 0.6s ease;\n  position: relative;\n  z-index: 10;\n  max-width: 500px;\n  margin: 40px auto;\n  padding: 40px;\n}\n\n/* =====================================================\n   FORM HEADER & TITLE\n===================================================== */\n.n8n-form h1 {\n  font-weight: 700 !important;\n  letter-spacing: -0.4px !important;\n  color: var(--color-header) !important;\n  font-size: 28px !important;\n  margin-bottom: 10px !important;\n}\n\n.n8n-form p {\n  color: #64748b !important;\n  margin-bottom: 30px !important;\n}\n\n/* =====================================================\n   FIELD LABELS\n===================================================== */\nlabel {\n  font-weight: 600 !important;\n  color: var(--color-label) !important;\n  font-size: var(--font-size-label) !important;\n  display: block !important;\n  margin-bottom: 8px !important;\n}\n\n/* =====================================================\n   FILE UPLOAD INPUT\n===================================================== */\ninput[type=\"file\"] {\n  background: #f8fafc !important;\n  border: 2px dashed var(--color-input-border) !important;\n  border-radius: var(--border-radius-input) !important;\n  padding: 20px !important;\n  transition: all 0.3s ease !important;\n  cursor: pointer !important;\n  width: 100% !important;\n  font-size: 14px !important;\n  color: #64748b !important;\n}\n\ninput[type=\"file\"]:hover {\n  background: #eef2ff !important;\n  border-color: var(--color-focus-border) !important;\n  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1) !important;\n}\n\ninput[type=\"file\"]::file-selector-button {\n  background: var(--color-focus-border) !important;\n  color: white !important;\n  border: none !important;\n  padding: 8px 16px !important;\n  border-radius: 8px !important;\n  font-weight: 600 !important;\n  cursor: pointer !important;\n  margin-right: 12px !important;\n  transition: all 0.2s ease !important;\n}\n\ninput[type=\"file\"]::file-selector-button:hover {\n  background: #4f46e5 !important;\n  transform: translateY(-1px);\n}\n\n/* =====================================================\n   NUMBER INPUTS (Width & Height)\n===================================================== */\ninput[type=\"number\"] {\n  width: 100% !important;\n  padding: 12px 16px !important;\n  border: 2px solid var(--color-input-border) !important;\n  border-radius: var(--border-radius-input) !important;\n  background: #f8fafc !important;\n  font-size: var(--font-size-input) !important;\n  color: var(--color-header) !important;\n  transition: all 0.3s ease !important;\n  font-weight: 500 !important;\n}\n\ninput[type=\"number\"]:focus {\n  outline: none !important;\n  border-color: var(--color-focus-border) !important;\n  background: #ffffff !important;\n  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1) !important;\n}\n\n/* =====================================================\n   FIELD SPACING\n===================================================== */\n.n8n-form-field {\n  margin-bottom: 24px !important;\n}\n\n/* =====================================================\n   SUBMIT BUTTON\n===================================================== */\nbutton[type=\"submit\"] {\n  height: var(--submit-btn-height) !important;\n  width: 100% !important;\n  background: var(--color-submit-btn-bg) !important;\n  color: var(--color-submit-btn-text) !important;\n  font-weight: 700 !important;\n  font-size: 16px !important;\n  border-radius: 14px !important;\n  border: none !important;\n  box-shadow: 0px 12px 30px rgba(79, 70, 229, 0.5) !important;\n  transition: all 0.35s ease !important;\n  cursor: pointer !important;\n  margin-top: 30px !important;\n  text-transform: uppercase !important;\n  letter-spacing: 0.5px !important;\n}\n\nbutton[type=\"submit\"]:hover {\n  transform: translateY(-2px) !important;\n  box-shadow: 0px 18px 40px rgba(79, 70, 229, 0.65) !important;\n  filter: brightness(1.1);\n}\n\nbutton[type=\"submit\"]::after {\n  content: \"→\";\n  margin-left: 8px;\n  font-size: 20px;\n  display: inline-block;\n  transition: transform 0.3s ease;\n}\n\nbutton[type=\"submit\"]:hover::after {\n  transform: translateX(6px);\n}\n\nbutton[type=\"submit\"]:active {\n  transform: translateY(0) !important;\n}\n\n/* =====================================================\n   FADE-UP ANIMATION\n===================================================== */\n@keyframes fadeUp {\n  from {\n    opacity: 0;\n    transform: translateY(18px);\n  }\n  to {\n    opacity: 1;\n    transform: translateY(0);\n  }\n}\n\n/* =====================================================\n   MOBILE RESPONSIVE\n===================================================== */\n@media (max-width: 640px) {\n  body::before {\n    font-size: 48px;\n    letter-spacing: 24px;\n  }\n\n  .n8n-card {\n    margin: 20px !important;\n    padding: 30px 20px !important;\n    max-width: 100% !important;\n  }\n\n  .n8n-form h1 {\n    font-size: 24px !important;\n  }\n\n  button[type=\"submit\"] {\n    height: 48px !important;\n  }\n}\n\n/* =====================================================\n   LOADING STATE (OPTIONAL)\n===================================================== */\nbutton[type=\"submit\"]:disabled {\n  opacity: 0.6 !important;\n  cursor: not-allowed !important;\n  transform: none !important;\n}\n\nbutton[type=\"submit\"]:disabled::after {\n  content: \"⏳\";\n  animation: spin 1s linear infinite;\n}\n\n@keyframes spin {\n  from { transform: rotate(0deg); }\n  to { transform: rotate(360deg); }\n}"
+        }
+      },
+      "id": "6e907402-b096-4635-937f-0ea35106bfd2",
+      "name": "Form Trigger",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [
+        32,
+        -176
+      ],
+      "webhookId": "b98a94c1-840a-44a7-95c3-0f9d8da8cb17"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"contents\": [\n    {\n      \"role\": \"user\",\n      \"parts\": [\n        {\n          \"text\": \"{{ $json.Prompt }}\"\n        },\n        {\n          \"inline_data\": {\n            \"mime_type\": \"{{ $json['Upload Image'].mimetype }}\",\n            \"data\": \"{{ $json.data }}\"\n          }\n        }\n      ]\n    }\n  ],\n  \"generationConfig\": {\n    \"responseModalities\": [\"IMAGE\", \"TEXT\"],\n    \"imageConfig\": {\n      \"imageSize\": \"{{ $json.imageSize }}\",\n      \"aspectRatio\": \"{{ $json.aspectRatio }}\"\n    }\n  }\n}",
+        "options": {}
+      },
+      "id": "39be7ecd-e290-4fa4-af4a-6cee3c772684",
+      "name": "Gemini Image Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        656,
+        -176
+      ],
+      "retryOnFail": false,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "9iMAMrR5diFOtN5Q",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "binaryToPropery",
+        "binaryPropertyName": "Upload_Image",
+        "options": {
+          "encoding": "base64",
+          "keepSource": "json"
+        }
+      },
+      "id": "ef3d1a37-e203-41f4-87f1-886e574a0ca1",
+      "name": "Extract File",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        432,
+        -176
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "base64Image",
+        "options": {
+          "fileName": "={{ $('Form Trigger').item.json['Prompt'].replace(/[^a-zA-Z0-9 ]/g, '').replace(/\\s+/g, '_').substring(0, 50) }}_{{ $itemIndex + 1 }}_{{ new Date().toISOString().replace(/[-:T]/g, '').substring(0, 15) }}.jpeg"
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        1104,
+        -176
+      ],
+      "id": "c762f0c9-8543-492c-8375-bf8d653b9593",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get parts array safely\nconst parts = $json.candidates[0].content.parts || [];\n\nlet base64Image = null;\n\n// Find whichever part contains inlineData (index 0 or 1)\nfor (const part of parts) {\n  if (part.inlineData) {\n    base64Image = part.inlineData;\n    break;\n  }\n}\n\n// If nothing found, throw readable error\nif (!base64Image) {\n  throw new Error(\"No inlineData image found in Gemini response\");\n}\n\n// Return clean output with forced jpeg mimeType\nreturn [\n  {\n    json: {\n      base64Image: base64Image.data,\n      mimeType: \"image/jpeg\"\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        -176
+      ],
+      "id": "88c4bd19-0136-4f8c-99c7-e077bfaa775b",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a79efc23-4245-4d2a-a685-c8e81d2d0eac",
+              "name": "Prompt",
+              "value": "={{ \n$json[\"Prompt\"] && $json[\"Prompt\"].trim() !== \"\" \n    ? $json[\"Prompt\"] \n    : (\n  $json[\"Select a Default Prompt\"] === \"Hero Image on white background\" ? \"A professional, high-resolution 3D hero shot render of the product, captured with a 55mm focal length. The product should rendered with Cinema 4D on a pure white background.\"\n  : $json[\"Select a Default Prompt\"] === \"Cinematic Hero Shot 3D Render\" ? \"A professional, high-resolution 3D hero cinematic shot render of the product, captured with a 55mm focal length. The product should rendered with Cinema 4D.\"\n  : \"\"\n)\n}}",
+              "type": "string"
+            },
+            {
+              "id": "b89efc23-5346-5e3b-b796-d9e92e3e1fbd",
+              "name": "imageSize",
+              "value": "={{ $json[\"Image Size\"] === \"1200x630 (custom)\" ? \"1K\" : \"1K\" }}",
+              "type": "string"
+            },
+            {
+              "id": "c90fgd34-6457-6f4c-c8a7-eaf03f4f2gce",
+              "name": "aspectRatio",
+              "value": "={{ $json[\"Image Size\"] === \"1200x630 (custom)\" ? \"16:9\" : \"1:1\" }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        -176
+      ],
+      "id": "5ab7379d-63fe-4f89-896d-6c47fd8fd301",
+      "name": "Edit Fields"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Form Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Image Request": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract File": {
+      "main": [
+        [
+          {
+            "node": "Gemini Image Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Extract File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1631b6ae-a2b0-4d9e-9291-00ba88353558",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d6af0db0a294f0f8d987a154ece873fc505b8b0a096f0e6ab176af6912a47341"
+  },
+  "id": "qDgmfnGwuLQqk2du",
+  "tags": []
+}
