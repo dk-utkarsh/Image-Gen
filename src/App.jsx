@@ -8,32 +8,32 @@ const MATTE_PRESETS = [
   { 
     id: 'clinical-matte', 
     label: '🧴 Soft Matte Clinic', 
-    prompt: 'Professional medical product photography, soft diffused natural lighting, minimal shadows, matte surface finish, high-end designer clinical aesthetic, pastel gray background, 8k resolution.' 
+    prompt: 'Professional medical product photography, 8k resolution, ultra HD, highly detailed textures, soft diffused natural lighting, minimal shadows, matte surface finish, high-end designer clinical aesthetic, pastel gray background.' 
   },
   { 
     id: 'cinematic-hero', 
     label: '🏆 Cinematic Hero 3D', 
-    prompt: 'Premium 3D cinematic hero shot of a dental product. High-end industrial render, dramatic medical lighting, soft rim highlights, 8k resolution, advertising quality, Octane render aesthetic.' 
+    prompt: 'Ultra HD 3D cinematic hero shot, 8k resolution, highly rendered textures, ray-tracing reflections, Physically Based Rendering (PBR), dramatic medical lighting, soft rim highlights, Octane render aesthetic.' 
   },
   { 
     id: 'catalog-white', 
     label: '🛒 Pure White Catalog', 
-    prompt: 'Standard e-commerce listing on a solid pure white background (#FFFFFF). High fidelity, commercial grade, clean shadows, sharp product details.' 
+    prompt: 'Standard e-commerce listing on a solid pure white background (#FFFFFF). Ultra HD, high fidelity, professional color grading, clean shadows, sharp product details.' 
   },
   { 
     id: 'studio-pastel', 
     label: '🎨 Pastel Designer', 
-    prompt: 'Premium studio product shot with a soft pastel secondary light, elegant minimalist composition, clean transitions, matte textures, commercial high-fidelity render.' 
+    prompt: 'Premium studio product shot, ultra HD, 8k resolution, soft pastel secondary light, elegant minimalist composition, clean transitions, matte textures, commercial high-fidelity ray-traced render.' 
   },
   { 
     id: 'industrial-3d', 
     label: '🏗️ Industrial 3D Studio', 
-    prompt: 'Clean industrial 3D render of medical equipment, architectural lighting, sharp focus, octane render output, high-fidelity mechanical details, professional studio setup.' 
+    prompt: 'Clean industrial 3D render, ultra HD, 8k, Unreal Engine 5 render style, sharp focus, octane render output, high-fidelity mechanical details, professional studio setup.' 
   },
   { 
     id: 'macro-detail', 
     label: '🔍 Macro Precision', 
-    prompt: 'Extreme close-up macro shot, soft clinical focus, high-tech metallic matte finish, sharp intricate details, professional dentistry photography.' 
+    prompt: 'Extreme close-up macro shot, ultra HD resolution, 8k, soft clinical focus, high-tech metallic matte finish, sharp intricate details, professional dentistry photography.' 
   },
 ];
 
@@ -56,7 +56,6 @@ function App() {
   const [originalImage, setOriginalImage] = useState(null);
   const [showOriginal, setShowOriginal] = useState(false);
   const [error, setError] = useState('');
-  const [imageSize, setImageSize] = useState('1024x1024');
 
   const toggleEnhancer = (id) => {
     setActiveEnhancers(prev => 
@@ -86,6 +85,7 @@ function App() {
       Do not alter structural geometry, branding, text, or functional details of the product.
       The product must be 100% identical to the source asset.
       ${!isBackgroundRequested ? 'STRICT: Keep the original background of the source image exactly as it is. Do not modify the environment.' : 'TRANSFORM: Synthesize a professional background as requested while keeping the product identical.'}
+      QUALITY: Output MUST be Ultra High Definition (UHD), 8k resolution, highly rendered with realistic textures, ray-tracing, and PBR shaders. Use professional photography standards.
     `.trim();
 
     const finalPrompt = `
@@ -100,8 +100,8 @@ function App() {
     setShowOriginal(false);
     
     const config = {
-      imageSize: '1K',
-       aspectRatio: imageSize === '1200x630' ? '16:9' : '1:1'
+      imageSize: '2K',
+       aspectRatio: '1:1'
     };
 
     try {
@@ -213,8 +213,7 @@ function App() {
 
             <div className="action-zone">
               <div className="matrix-format">
-                <button className={imageSize === '1024x1024' ? 'on' : ''} onClick={() => setImageSize('1024x1024')}>1:1 SQUARE</button>
-                <button className={imageSize === '1200x630' ? 'on' : ''} onClick={() => setImageSize('1200x630')}>16:9 BANNER</button>
+                <button className="on">1:1 SQUARE</button>
               </div>
               <button 
                 className="btn-matrix-trigger artist-generate" 

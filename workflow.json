@@ -62,20 +62,6 @@
                   }
                 ]
               }
-            },
-            {
-              "fieldLabel": "Image Size",
-              "fieldType": "radio",
-              "fieldOptions": {
-                "values": [
-                  {
-                    "option": "1024x1024 (1:1)"
-                  },
-                  {
-                    "option": "1200x630 (custom)"
-                  }
-                ]
-              }
             }
           ]
         },
@@ -176,19 +162,19 @@
             {
               "id": "a79efc23-4245-4d2a-a685-c8e81d2d0eac",
               "name": "Prompt",
-              "value": "={{ \n$json[\"Prompt\"] && $json[\"Prompt\"].trim() !== \"\" \n    ? $json[\"Prompt\"] \n    : (\n  $json[\"Select a Default Prompt\"] === \"Hero Image on white background\" ? \"A professional, high-resolution 3D hero shot render of the product, captured with a 55mm focal length. The product should rendered with Cinema 4D on a pure white background.\"\n  : $json[\"Select a Default Prompt\"] === \"Cinematic Hero Shot 3D Render\" ? \"A professional, high-resolution 3D hero cinematic shot render of the product, captured with a 55mm focal length. The product should rendered with Cinema 4D.\"\n  : \"\"\n)\n}}",
+              "value": "={{ \n$json[\"Prompt\"] && $json[\"Prompt\"].trim() !== \"\" \n    ? $json[\"Prompt\"] \n    : (\n  $json[\"Select a Default Prompt\"] === \"Hero Image on white background\" ? \"A professional, Ultra HD 8k, high-resolution 3D hero shot render of the product, highly rendered textures, captured with a 55mm focal length. The product should rendered with Cinema 4D on a pure white background.\"\n  : $json[\"Select a Default Prompt\"] === \"Cinematic Hero Shot 3D Render\" ? \"A professional, Ultra HD 8k, high-resolution 3D hero cinematic shot render of the product, ray-traced reflections, highly rendered with realistic textures, captured with a 55mm focal length. The product should rendered with Cinema 4D.\"\n  : \"\"\n)\n}}",
               "type": "string"
             },
             {
               "id": "b89efc23-5346-5e3b-b796-d9e92e3e1fbd",
               "name": "imageSize",
-              "value": "={{ $json[\"Image Size\"] === \"1200x630 (custom)\" ? \"1K\" : \"1K\" }}",
+              "value": "2K",
               "type": "string"
             },
             {
               "id": "c90fgd34-6457-6f4c-c8a7-eaf03f4f2gce",
               "name": "aspectRatio",
-              "value": "={{ $json[\"Image Size\"] === \"1200x630 (custom)\" ? \"16:9\" : \"1:1\" }}",
+              "value": "1:1",
               "type": "string"
             }
           ]
