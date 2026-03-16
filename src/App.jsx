@@ -43,7 +43,7 @@ const ENHANCERS = [
   { id: 'clinical-clean', label: 'Sterile Clarity', value: 'Maximize clinical cleanliness and artifact-free surfaces.' },
 ];
 
-const VITE_GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || 'AIzaSyDh89hMkOyPb7Hnsxpop8zn_LeC-ZMh6hY';
+const VITE_GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
 function App() {
   const [apiKey] = useState(VITE_GEMINI_API_KEY);
