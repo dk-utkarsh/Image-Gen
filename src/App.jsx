@@ -315,11 +315,22 @@ function App() {
                     ✨ ENHANCE PIXELS
                   </button>
                   <button className="btn-matrix-download" onClick={() => {
-                    const link = document.createElement('a');
-                    link.href = currentResult;
-                    link.download = 'dentalkart-matrix-asset.png';
-                    link.click();
-                  }}>EXPORT NEURAL DATA</button>
+                    const img = new Image();
+                    img.onload = () => {
+                      const canvas = document.createElement('canvas');
+                      canvas.width = img.naturalWidth;
+                      canvas.height = img.naturalHeight;
+                      const ctx = canvas.getContext('2d');
+                      ctx.fillStyle = '#FFFFFF';
+                      ctx.fillRect(0, 0, canvas.width, canvas.height);
+                      ctx.drawImage(img, 0, 0);
+                      const link = document.createElement('a');
+                      link.href = canvas.toDataURL('image/jpeg', 0.95);
+                      link.download = 'dentalkart-asset.jpg';
+                      link.click();
+                    };
+                    img.src = currentResult;
+                  }}>EXPORT JPEG</button>
                 </div>
               </div>
             ) : (
