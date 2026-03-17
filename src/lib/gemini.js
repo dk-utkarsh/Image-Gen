@@ -1,9 +1,25 @@
+// Dental abbreviations that trigger false-positive safety filters
+const DENTAL_TERM_MAP = [
+  [/\bpedo\b/gi, 'Pediatric'],
+  [/\bpedo\s+extraction\b/gi, 'Pediatric Extraction'],
+  [/\bpedo\s+forceps\b/gi, 'Pediatric Forceps'],
+];
+
+const sanitizeDentalPrompt = (text) => {
+  let sanitized = text;
+  for (const [pattern, replacement] of DENTAL_TERM_MAP) {
+    sanitized = sanitized.replace(pattern, replacement);
+  }
+  return sanitized;
+};
+
 export const generateImage = async (apiKey, prompt, baseImages = [], config = {}) => {
   const { imageSize = "1K", aspectRatio = "1:1" } = config;
-  
+
   const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent?key=${apiKey}`;
 
-  const userParts = [{ text: prompt }];
+  const safePrompt = sanitizeDentalPrompt(prompt);
+  const userParts = [{ text: safePrompt }];
 
   if (baseImages && baseImages.length > 0) {
     baseImages.forEach(img => {
@@ -49,13 +65,32 @@ export const generateImage = async (apiKey, prompt, baseImages = [], config = {}
     }
 
     const result = await response.json();
-    
+
+    // Check if response was blocked by safety filters
+    if (!result.candidates || result.candidates.length === 0) {
+      const blockReason = result.promptFeedback?.blockReason;
+      if (blockReason) {
+        throw new Error(`Request blocked by safety filter: ${blockReason}. Try rephrasing your prompt.`);
+      }
+      throw new Error("No response from API. The prompt may have been filtered.");
+    }
+
+    const candidate = result.candidates[0];
+    if (candidate.finishReason === 'SAFETY') {
+      throw new Error("Image generation blocked by safety filters. Try rephrasing your prompt.");
+    }
+
+    if (!candidate.content || !candidate.content.parts) {
+      throw new Error("Empty response from API. Try a different prompt.");
+    }
+
     // Extract base64 image from parts
-    const parts = result.candidates[0].content.parts || [];
+    const parts = candidate.content.parts;
     const imagePart = parts.find(p => p.inline_data || p.inlineData);
-    
+
     if (!imagePart) {
-      throw new Error("No image found in response");
+      const textPart = parts.find(p => p.text);
+      throw new Error(textPart ? `API returned text only: ${textPart.text.slice(0, 100)}` : "No image found in response");
     }
 
     const imageData = imagePart.inline_data?.data || imagePart.inlineData?.data;

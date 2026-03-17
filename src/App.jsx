@@ -44,8 +44,7 @@ const MATTE_PRESETS = [
 ];
 
 const ENHANCERS = [
-  { id: 'matte', label: 'Matte Finish', value: 'Apply a luxurious matte texture and remove all harsh specular reflections.' },
-  { id: 'soft-shadows', label: 'Cloud Shadows', value: 'Render extremely soft, diffused ambient occlusion shadows.' },
+  { id: 'sharpness', label: 'Sharpness', value: 'MANDATORY SHARPNESS OVERRIDE: Apply maximum unsharp mask and high-pass sharpening across the entire product. Every edge, engraving, texture, and surface detail must be hyper-crisp with extreme micro-contrast. Amplify fine detail frequency by 200%. Zero softness allowed on the product — all contours and material grain must cut like a blade. Output must look sharper than a macro photograph at f/16.' },
   { id: 'clinical-clean', label: 'Sterile Clarity', value: 'Maximize clinical cleanliness and artifact-free surfaces.' },
 ];
 
@@ -81,24 +80,61 @@ function App() {
     setOriginalImage(remaining.length > 0 ? remaining[0].preview : null);
   };
 
-  const handleEnhancePixels = () => {
+  const handleEnhancePixels = async () => {
+    if (!currentResult) return;
     setIsEnhancing(true);
-    handleGenerate(true);
+    setLoading(true);
+    setError('');
+
+    const ENHANCE_PROMPT = `
+      ENHANCE THIS IMAGE TO MAXIMUM QUALITY. This is a second-pass refinement.
+      CRITICAL RULES:
+      - Do NOT change the product, composition, angle, background, or any visual element.
+      - The output must be pixel-identical in layout — only quality improves.
+      ENHANCEMENT DIRECTIVES:
+      - Apply extreme supersampling and sub-pixel rendering.
+      - Sharpen every edge, engraving, texture, and surface detail to hyper-crisp levels.
+      - Boost micro-contrast on all product surfaces and material grain.
+      - Eliminate all compression artifacts, noise, banding, and aliasing.
+      - Enhance metallic reflections, surface textures, and material fidelity.
+      - Render at maximum 8K UHD+ fidelity with professional advertising photography quality.
+      - High-frequency detail refinement on every product contour.
+      OUTPUT: The highest possible quality version of this exact image.
+    `.trim();
+
+    // Convert the current result (base64 data URL) to inline_data for the API
+    const base64Data = currentResult.split(',')[1];
+    const mimeType = currentResult.split(';')[0].split(':')[1];
+    const enhanceImages = [{
+      data: base64Data,
+      type: mimeType,
+    }];
+
+    const config = { imageSize: '2K', aspectRatio: '1:1' };
+
+    try {
+      const imageUrl = await generateImage(apiKey, ENHANCE_PROMPT, enhanceImages, config);
+      setCurrentResult(imageUrl);
+    } catch (err) {
+      setError(err.message || 'Enhancement failed.');
+    } finally {
+      setLoading(false);
+      setIsEnhancing(false);
+    }
   };
 
-  const handleGenerate = async (isEnhancePass = false) => {
+  const handleGenerate = async () => {
     const preset = MATTE_PRESETS.find(s => s.id === selectedPreset);
     const enhancerTexts = activeEnhancers.map(id => ENHANCERS.find(e => e.id === id).value).join(', ');
-    
+
     const isBackgroundRequested = /background|environment|scene|clinic|room|table|surface|desk|shelf|studio|platform|setup|location/.test(prompt.toLowerCase());
 
     const PRODUCT_IDENTITY_LAYER = `
-      CRITICAL: Preserve the core product exactly as shown in the reference image. 
+      CRITICAL: Preserve the core product exactly as shown in the reference image.
       Do not alter structural geometry, branding, text, or functional details of the product.
       The product must be 100% identical to the source asset.
       ${!isBackgroundRequested ? 'STRICT: Keep the original background of the source image exactly as it is. Do not modify the environment.' : 'TRANSFORM: Synthesize a professional background as requested while keeping the product identical.'}
       QUALITY: Output MUST be Pixel-Perfect Ultra High Definition (UHD+), 8k resolution, razor-sharp clarity, no artifacts, highly rendered with realistic textures, ray-tracing, and PBR shaders. Use professional advertising photography standards.
-      ${isEnhancePass ? 'ENHANCEMENT: Finalize with extreme supersampling, hyper-realistic micro-textures, and high-frequency detail refinement. Eliminate all aliasing and noise.' : ''}
     `.trim();
 
     const finalPrompt = `
@@ -108,14 +144,14 @@ function App() {
       Technical Enhancements: ${enhancerTexts}
     `.trim();
 
-    if (!isEnhancePass) setIsEnhancing(false);
+    setIsEnhancing(false);
     setLoading(true);
     setError('');
     setShowOriginal(false);
-    
+
     const config = {
       imageSize: '2K',
-       aspectRatio: '1:1'
+      aspectRatio: '1:1'
     };
 
     try {
@@ -269,7 +305,7 @@ function App() {
                   labelActive={isEnhancing ? "Enhancing..." : "Processing..."}
                   generating={loading}
                   highlightHueDeg={195}
-                  onClick={() => handleGenerate(false)}
+                  onClick={handleGenerate}
                   disabled={loading}
                 />
               </div>
