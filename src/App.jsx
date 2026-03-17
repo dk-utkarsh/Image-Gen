@@ -2,6 +2,12 @@ import React, { useState, useEffect } from 'react';
 import ImageUploader from './components/ImageUploader';
 import ReferenceGallery from './components/ReferenceGallery';
 import { generateImage } from './lib/gemini';
+import { SplineScene } from './components/ui/splite';
+import { Card } from './components/ui/card';
+import { Spotlight } from './components/ui/spotlight';
+import { ContainerScroll } from './components/ui/container-scroll-animation';
+import { SparklesCore } from './components/ui/sparkles';
+import AnimatedGenerateButton from './components/ui/animated-generate-button';
 import './index.css';
 
 const MATTE_PRESETS = [
@@ -138,9 +144,21 @@ function App() {
       <header className="matte-header">
         <div className="matte-brand">
           <div className="matte-core"></div>
-          <div className="brand-label">
+          <div className="brand-label relative">
             <span>DENTALKART</span>
-            <label>DESIGN STUDIO • MATTE EDITION</label>
+            <label>DESIGN STUDIO</label>
+            <div className="brand-sparkles">
+              <SparklesCore
+                id="brand-sparkles"
+                background="transparent"
+                minSize={0.4}
+                maxSize={1}
+                particleDensity={80}
+                className="w-full h-full"
+                particleColor="#FFFFFF"
+                speed={1}
+              />
+            </div>
           </div>
         </div>
         <div className="matrix-status">
@@ -153,8 +171,30 @@ function App() {
         </div>
       </header>
 
+      {/* Robot 3D Hero with Scroll Animation */}
+      <div className="flex flex-col overflow-hidden">
+        <ContainerScroll
+          titleComponent={
+            <p className="text-sm md:text-base font-semibold tracking-[0.3em] uppercase text-neutral-500">
+              Powered By <span className="text-white">Gemini-Pro</span>
+            </p>
+          }
+        >
+          <div className="relative w-full h-full">
+            <Spotlight
+              className="-top-40 left-0 md:left-60 md:-top-20"
+              fill="white"
+            />
+            <SplineScene
+              scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
+              className="w-full h-full"
+            />
+          </div>
+        </ContainerScroll>
+      </div>
+
       <main className="matrix-flow">
-        
+
         {/* Phase 1: Inputs */}
         <section className="matrix-section input-hub">
           <div className="matrix-glass-card main-controls">
@@ -175,8 +215,8 @@ function App() {
 
               <div className="input-cell prompts">
                 <label className="matrix-label">Artistic Directives</label>
-                <textarea 
-                  placeholder="Describe your vision... (Note: Mention 'background' to modify environment)" 
+                <textarea
+                  placeholder="Describe your vision... (Note: Mention 'background' to modify environment)"
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
                   className="matrix-textarea"
@@ -193,8 +233,8 @@ function App() {
               <label className="matrix-label">Creative Protocols (Optional)</label>
               <div className="protocol-list">
                 {MATTE_PRESETS.map(p => (
-                  <button 
-                    key={p.id} 
+                  <button
+                    key={p.id}
                     className={`protocol-btn ${selectedPreset === p.id ? 'active' : ''}`}
                     onClick={() => setSelectedPreset(selectedPreset === p.id ? null : p.id)}
                   >
@@ -208,7 +248,7 @@ function App() {
               <label className="matrix-label">Neural Artifacts</label>
               <div className="enhancer-list">
                 {ENHANCERS.map(e => (
-                  <button 
+                  <button
                     key={e.id}
                     className={`enhancer-tag ${activeEnhancers.includes(e.id) ? 'active' : ''}`}
                     onClick={() => toggleEnhancer(e.id)}
@@ -223,13 +263,16 @@ function App() {
               <div className="matrix-format">
                 <button className="on">1:1 SQUARE</button>
               </div>
-              <button 
-                className="btn-matrix-trigger artist-generate" 
-                onClick={() => handleGenerate(false)} 
-                disabled={loading}
-              >
-                {loading ? (isEnhancing ? 'ENHANCING PIXELS...' : 'PROCESSING ART...') : 'GENERATE IMAGE'}
-              </button>
+              <div className="flex justify-end">
+                <AnimatedGenerateButton
+                  labelIdle="Generate Image"
+                  labelActive={isEnhancing ? "Enhancing..." : "Processing..."}
+                  generating={loading}
+                  highlightHueDeg={195}
+                  onClick={() => handleGenerate(false)}
+                  disabled={loading}
+                />
+              </div>
             </div>
           </div>
           {error && <div className="matrix-error-alert">{error}</div>}
@@ -241,12 +284,12 @@ function App() {
             {currentResult ? (
               <div className="result-workspace">
                 <div className="output-canvas">
-                  <img 
-                    src={showOriginal ? originalImage : currentResult} 
-                    alt="Result" 
+                  <img
+                    src={showOriginal ? originalImage : currentResult}
+                    alt="Result"
                     className={showOriginal ? 'dimmed' : ''}
                   />
-                  
+
                   {loading && (
                     <div className="matrix-scanner-overlay">
                       <div className="cyber-line"></div>
@@ -257,7 +300,7 @@ function App() {
                 </div>
 
                 <div className="result-actions">
-                  <button 
+                  <button
                     className={`btn-matrix-mode ${showOriginal ? 'active' : ''}`}
                     onMouseDown={() => setShowOriginal(true)}
                     onMouseUp={() => setShowOriginal(false)}
@@ -265,7 +308,7 @@ function App() {
                   >
                     ORIGINAL FREQUENCY
                   </button>
-                  <button 
+                  <button
                     className={`btn-matrix-mode enhance-pixels-btn ${isEnhancing ? 'loading' : ''}`}
                     onClick={handleEnhancePixels}
                     disabled={loading}
@@ -295,7 +338,7 @@ function App() {
       </main>
 
       <footer className="matrix-footer">
-        <p>DENTALKART DESIGN STUDIO • MATTE EDITION • 2026</p>
+        <p>DENTALKART DESIGN STUDIO • 2026</p>
       </footer>
     </div>
   );
