@@ -285,9 +285,8 @@ function App() {
               <div className="result-workspace">
                 <div className="output-canvas">
                   <img
-                    src={showOriginal ? originalImage : currentResult}
-                    alt="Result"
-                    className={showOriginal ? 'dimmed' : ''}
+                    src={showOriginal && originalImage ? originalImage : currentResult}
+                    alt={showOriginal ? 'Original' : 'Result'}
                   />
 
                   {loading && (
