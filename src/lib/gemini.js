@@ -13,6 +13,41 @@ const sanitizeDentalPrompt = (text) => {
   return sanitized;
 };
 
+const MAX_IMAGE_SIZE_KB = 1000;
+
+const compressToMaxSize = (dataUrl) => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      const ctx = canvas.getContext('2d');
+
+      const tryCompress = (quality, scale) => {
+        const w = Math.round(img.naturalWidth * scale);
+        const h = Math.round(img.naturalHeight * scale);
+        canvas.width = w;
+        canvas.height = h;
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, w, h);
+        ctx.drawImage(img, 0, 0, w, h);
+
+        const compressed = canvas.toDataURL('image/jpeg', quality);
+        const sizeKB = Math.round((compressed.length - compressed.indexOf(',') - 1) * 3 / 4 / 1024);
+
+        if (sizeKB <= MAX_IMAGE_SIZE_KB) return resolve(compressed);
+        if (quality > 0.3) return tryCompress(quality - 0.05, scale);
+        if (scale > 0.5) return tryCompress(0.8, scale - 0.1);
+        resolve(compressed);
+      };
+
+      tryCompress(0.92, 1.0);
+    };
+    img.src = dataUrl;
+  });
+};
+
 export const generateImage = async (apiKey, prompt, baseImages = [], config = {}) => {
   const { imageSize = "1K", aspectRatio = "1:1" } = config;
 
@@ -96,7 +131,8 @@ export const generateImage = async (apiKey, prompt, baseImages = [], config = {}
     const imageData = imagePart.inline_data?.data || imagePart.inlineData?.data;
     const mimeType = imagePart.inline_data?.mime_type || imagePart.inlineData?.mimeType || "image/png";
 
-    return `data:${mimeType};base64,${imageData}`;
+    const rawDataUrl = `data:${mimeType};base64,${imageData}`;
+    return compressToMaxSize(rawDataUrl);
   } catch (err) {
     console.error("Gemini API Error:", err);
     throw err;
