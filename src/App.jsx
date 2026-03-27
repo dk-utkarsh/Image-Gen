@@ -360,9 +360,23 @@ function App() {
                       ctx.fillStyle = '#FFFFFF';
                       ctx.fillRect(0, 0, canvas.width, canvas.height);
                       ctx.drawImage(img, 0, 0);
+                      // Embed unique IST timestamp into image pixels to avoid duplicate detection
+                      const now = new Date();
+                      const istOffset = 5.5 * 60 * 60 * 1000;
+                      const ist = new Date(now.getTime() + istOffset);
+                      const ts = ist.getTime().toString();
+                      const imageData = ctx.getImageData(0, 0, canvas.width, 1);
+                      for (let i = 0; i < ts.length && i * 4 + 3 < imageData.data.length; i++) {
+                        // Slightly vary the blue channel of top-row pixels (invisible to eye)
+                        const idx = i * 4 + 2;
+                        const diff = (parseInt(ts[i]) % 3) - 1; // -1, 0, or 1
+                        imageData.data[idx] = Math.min(255, Math.max(0, imageData.data[idx] + diff));
+                      }
+                      ctx.putImageData(imageData, 0, 0);
+                      const istStr = ist.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', hour12: true }).replace(/[/:, ]/g, '-');
                       const link = document.createElement('a');
                       link.href = canvas.toDataURL('image/jpeg', 0.95);
-                      link.download = 'dentalkart-asset.jpg';
+                      link.download = `dentalkart-asset-${istStr}.jpg`;
                       link.click();
                     };
                     img.src = currentResult;

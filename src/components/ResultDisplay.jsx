@@ -13,10 +13,34 @@ const ResultDisplay = ({ image, loading }) => {
   if (!image) return null;
 
   const handleDownload = () => {
-    const link = document.createElement('a');
-    link.href = image;
-    link.download = `generated-image-${Date.now()}.png`;
-    link.click();
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0);
+      // Embed unique IST timestamp into image pixels to avoid duplicate detection
+      const now = new Date();
+      const istOffset = 5.5 * 60 * 60 * 1000;
+      const ist = new Date(now.getTime() + istOffset);
+      const ts = ist.getTime().toString();
+      const imageData = ctx.getImageData(0, 0, canvas.width, 1);
+      for (let i = 0; i < ts.length && i * 4 + 3 < imageData.data.length; i++) {
+        const idx = i * 4 + 2;
+        const diff = (parseInt(ts[i]) % 3) - 1;
+        imageData.data[idx] = Math.min(255, Math.max(0, imageData.data[idx] + diff));
+      }
+      ctx.putImageData(imageData, 0, 0);
+      const istStr = ist.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', hour12: true }).replace(/[/:, ]/g, '-');
+      const link = document.createElement('a');
+      link.href = canvas.toDataURL('image/jpeg', 0.95);
+      link.download = `dentalkart-asset-${istStr}.jpg`;
+      link.click();
+    };
+    img.src = image;
   };
 
   return (
