@@ -36,10 +36,10 @@ const MATTE_PRESETS = [
     label: '🏗️ Industrial 3D Studio', 
     prompt: 'Clean industrial 3D render, ultra HD, 8k, pixel-perfect sharpness, Unreal Engine 5 render style, sharp focus, octane render output, high-fidelity mechanical details, professional studio setup.' 
   },
-  { 
-    id: 'macro-detail', 
-    label: '🔍 Macro Precision', 
-    prompt: 'Extreme close-up macro shot, ultra HD resolution, 8k, pixel-perfect focus, soft clinical focus, high-tech metallic matte finish, sharp intricate details, professional dentistry photography.' 
+  {
+    id: 'macro-detail',
+    label: '🔍 Macro Precision',
+    prompt: 'Extreme close-up macro shot, ultra HD resolution, 8k, pixel-perfect focus, soft clinical focus, high-tech metallic matte finish, sharp intricate details, professional dentistry photography.'
   },
 ];
 
@@ -62,6 +62,7 @@ function App() {
   const [showOriginal, setShowOriginal] = useState(false);
   const [error, setError] = useState('');
   const [isEnhancing, setIsEnhancing] = useState(false);
+  const [isRemovingWatermark, setIsRemovingWatermark] = useState(false);
 
   const toggleEnhancer = (id) => {
     setActiveEnhancers(prev => 
@@ -120,6 +121,34 @@ function App() {
     } finally {
       setLoading(false);
       setIsEnhancing(false);
+    }
+  };
+
+  const handleRemoveWatermark = async () => {
+    if (referenceImages.length === 0) return;
+    setIsRemovingWatermark(true);
+    setLoading(true);
+    setError('');
+    setShowOriginal(false);
+
+    const WATERMARK_PROMPT = `
+      CRITICAL: Preserve the core product shape, geometry, size, position, angle, and material exactly as shown.
+      REMOVE all text, words, names, brand names, logos, and any printed or overlaid stamps visible on the product surface and background. The text "Howarth" and any manufacturer markings or labels must be completely erased.
+      Where text was, fill with the matching metallic surface texture seamlessly so it looks like the text was never there.
+      Keep the background exactly as it is.
+      QUALITY: Pixel-Perfect Ultra High Definition (UHD+), 8k resolution, razor-sharp clarity, no artifacts, professional product photography.
+    `.trim();
+
+    const config = { imageSize: '2K', aspectRatio: '1:1' };
+
+    try {
+      const imageUrl = await generateImage(apiKey, WATERMARK_PROMPT, referenceImages, config);
+      setCurrentResult(imageUrl);
+    } catch (err) {
+      setError(err.message || 'Watermark removal failed.');
+    } finally {
+      setLoading(false);
+      setIsRemovingWatermark(false);
     }
   };
 
@@ -299,11 +328,18 @@ function App() {
               <div className="matrix-format">
                 <button className="on">1:1 SQUARE</button>
               </div>
-              <div className="flex justify-end">
+              <div className="action-buttons">
+                <button
+                  className={`btn-watermark ${isRemovingWatermark ? 'active' : ''}`}
+                  onClick={handleRemoveWatermark}
+                  disabled={loading || referenceImages.length === 0}
+                >
+                  {isRemovingWatermark ? '⏳ Cleaning...' : '🧹 Remove Watermark'}
+                </button>
                 <AnimatedGenerateButton
                   labelIdle="Generate Image"
                   labelActive={isEnhancing ? "Enhancing..." : "Processing..."}
-                  generating={loading}
+                  generating={loading && !isRemovingWatermark}
                   highlightHueDeg={195}
                   onClick={handleGenerate}
                   disabled={loading}

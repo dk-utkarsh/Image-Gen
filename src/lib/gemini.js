@@ -116,7 +116,7 @@ export const generateImage = async (apiKey, prompt, baseImages = [], config = {}
     }
 
     if (!candidate.content || !candidate.content.parts) {
-      throw new Error("Empty response from API. Try a different prompt.");
+      throw new Error(`Empty response (finishReason: ${candidate.finishReason || 'unknown'}). Try a different prompt.`);
     }
 
     // Extract base64 image from parts
@@ -129,9 +129,10 @@ export const generateImage = async (apiKey, prompt, baseImages = [], config = {}
     }
 
     const imageData = imagePart.inline_data?.data || imagePart.inlineData?.data;
-    const mimeType = imagePart.inline_data?.mime_type || imagePart.inlineData?.mimeType || "image/png";
 
-    const rawDataUrl = `data:${mimeType};base64,${imageData}`;
+    // Always normalize to JPEG regardless of what format the API returns (png, webp, etc.)
+    const originalMime = imagePart.inline_data?.mime_type || imagePart.inlineData?.mimeType || "image/png";
+    const rawDataUrl = `data:${originalMime};base64,${imageData}`;
     return compressToMaxSize(rawDataUrl);
   } catch (err) {
     console.error("Gemini API Error:", err);
