@@ -48,6 +48,9 @@ const compressToMaxSize = (dataUrl) => {
   });
 };
 
+const MAX_RETRIES = 3;
+const RETRYABLE_REASONS = ['MALFORMED_FUNCTION_CALL', 'RECITATION'];
+
 export const generateImage = async (apiKey, prompt, baseImages = [], config = {}) => {
   const { imageSize = "1K", aspectRatio = "1:1" } = config;
 
@@ -85,57 +88,78 @@ export const generateImage = async (apiKey, prompt, baseImages = [], config = {}
     }
   };
 
-  try {
-    const response = await fetch(endpoint, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(body)
-    });
+  let lastError = null;
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error?.message || "Failed to generate image");
-    }
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(body)
+      });
 
-    const result = await response.json();
-
-    // Check if response was blocked by safety filters
-    if (!result.candidates || result.candidates.length === 0) {
-      const blockReason = result.promptFeedback?.blockReason;
-      if (blockReason) {
-        throw new Error(`Request blocked by safety filter: ${blockReason}. Try rephrasing your prompt.`);
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error?.message || "Failed to generate image");
       }
-      throw new Error("No response from API. The prompt may have been filtered.");
+
+      const result = await response.json();
+
+      // Check if response was blocked by safety filters
+      if (!result.candidates || result.candidates.length === 0) {
+        const blockReason = result.promptFeedback?.blockReason;
+        if (blockReason) {
+          throw new Error(`Request blocked by safety filter: ${blockReason}. Try rephrasing your prompt.`);
+        }
+        throw new Error("No response from API. The prompt may have been filtered.");
+      }
+
+      const candidate = result.candidates[0];
+      if (candidate.finishReason === 'SAFETY') {
+        throw new Error("Image generation blocked by safety filters. Try rephrasing your prompt.");
+      }
+
+      // Retry on transient Gemini issues like MALFORMED_FUNCTION_CALL
+      if (!candidate.content || !candidate.content.parts) {
+        const reason = candidate.finishReason || 'unknown';
+        if (RETRYABLE_REASONS.includes(reason) && attempt < MAX_RETRIES) {
+          console.warn(`Gemini returned ${reason}, retrying (${attempt}/${MAX_RETRIES})...`);
+          lastError = new Error(`Gemini returned ${reason}`);
+          await new Promise(r => setTimeout(r, 1000 * attempt));
+          continue;
+        }
+        throw new Error(`Empty response (finishReason: ${reason}). Try a different prompt.`);
+      }
+
+      // Extract base64 image from parts
+      const parts = candidate.content.parts;
+      const imagePart = parts.find(p => p.inline_data || p.inlineData);
+
+      if (!imagePart) {
+        const textPart = parts.find(p => p.text);
+        throw new Error(textPart ? `API returned text only: ${textPart.text.slice(0, 100)}` : "No image found in response");
+      }
+
+      const imageData = imagePart.inline_data?.data || imagePart.inlineData?.data;
+
+      // Always normalize to JPEG regardless of what format the API returns (png, webp, etc.)
+      const originalMime = imagePart.inline_data?.mime_type || imagePart.inlineData?.mimeType || "image/png";
+      const rawDataUrl = `data:${originalMime};base64,${imageData}`;
+      return compressToMaxSize(rawDataUrl);
+    } catch (err) {
+      lastError = err;
+      // Only retry on retryable reasons, not on other errors
+      if (attempt < MAX_RETRIES && err.message?.includes('MALFORMED_FUNCTION_CALL')) {
+        console.warn(`Retrying after error (${attempt}/${MAX_RETRIES}):`, err.message);
+        await new Promise(r => setTimeout(r, 1000 * attempt));
+        continue;
+      }
+      console.error("Gemini API Error:", err);
+      throw err;
     }
-
-    const candidate = result.candidates[0];
-    if (candidate.finishReason === 'SAFETY') {
-      throw new Error("Image generation blocked by safety filters. Try rephrasing your prompt.");
-    }
-
-    if (!candidate.content || !candidate.content.parts) {
-      throw new Error(`Empty response (finishReason: ${candidate.finishReason || 'unknown'}). Try a different prompt.`);
-    }
-
-    // Extract base64 image from parts
-    const parts = candidate.content.parts;
-    const imagePart = parts.find(p => p.inline_data || p.inlineData);
-
-    if (!imagePart) {
-      const textPart = parts.find(p => p.text);
-      throw new Error(textPart ? `API returned text only: ${textPart.text.slice(0, 100)}` : "No image found in response");
-    }
-
-    const imageData = imagePart.inline_data?.data || imagePart.inlineData?.data;
-
-    // Always normalize to JPEG regardless of what format the API returns (png, webp, etc.)
-    const originalMime = imagePart.inline_data?.mime_type || imagePart.inlineData?.mimeType || "image/png";
-    const rawDataUrl = `data:${originalMime};base64,${imageData}`;
-    return compressToMaxSize(rawDataUrl);
-  } catch (err) {
-    console.error("Gemini API Error:", err);
-    throw err;
   }
+
+  throw lastError;
 };

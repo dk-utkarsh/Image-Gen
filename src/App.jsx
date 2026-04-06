@@ -2,10 +2,7 @@ import React, { useState, useEffect } from 'react';
 import ImageUploader from './components/ImageUploader';
 import ReferenceGallery from './components/ReferenceGallery';
 import { generateImage } from './lib/gemini';
-import { SplineScene } from './components/ui/splite';
 import { Card } from './components/ui/card';
-import { Spotlight } from './components/ui/spotlight';
-import { ContainerScroll } from './components/ui/container-scroll-animation';
 import { SparklesCore } from './components/ui/sparkles';
 import AnimatedGenerateButton from './components/ui/animated-generate-button';
 import './index.css';
@@ -235,28 +232,6 @@ function App() {
           READY
         </div>
       </header>
-
-      {/* Robot 3D Hero with Scroll Animation */}
-      <div className="flex flex-col overflow-hidden">
-        <ContainerScroll
-          titleComponent={
-            <p className="text-sm md:text-base font-semibold tracking-[0.3em] uppercase text-neutral-500">
-              Powered By <span className="text-white">Gemini-Pro</span>
-            </p>
-          }
-        >
-          <div className="relative w-full h-full">
-            <Spotlight
-              className="-top-40 left-0 md:left-60 md:-top-20"
-              fill="white"
-            />
-            <SplineScene
-              scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
-              className="w-full h-full"
-            />
-          </div>
-        </ContainerScroll>
-      </div>
 
       <main className="matrix-flow">
 
