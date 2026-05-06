@@ -54,7 +54,7 @@ const RETRYABLE_REASONS = ['MALFORMED_FUNCTION_CALL', 'RECITATION'];
 export const generateImage = async (apiKey, prompt, baseImages = [], config = {}) => {
   const { imageSize = "1K", aspectRatio = "1:1" } = config;
 
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent?key=${apiKey}`;
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${apiKey}`;
 
   const safePrompt = sanitizeDentalPrompt(prompt);
   const userParts = [{ text: safePrompt }];
