@@ -47,6 +47,41 @@ const ENHANCERS = [
 
 const VITE_GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
+const FORMAT_PRESETS = {
+  square: { label: '1:1 SQUARE', aspectRatio: '1:1', width: null, height: null },
+  banner: { label: '1200 × 630', aspectRatio: '16:9', width: 1200, height: 630 },
+};
+
+const resizeToExact = (dataUrl, targetWidth, targetHeight) => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = targetWidth;
+      canvas.height = targetHeight;
+      const ctx = canvas.getContext('2d');
+
+      const srcRatio = img.naturalWidth / img.naturalHeight;
+      const targetRatio = targetWidth / targetHeight;
+
+      let sx = 0, sy = 0, sw = img.naturalWidth, sh = img.naturalHeight;
+      if (srcRatio > targetRatio) {
+        sw = img.naturalHeight * targetRatio;
+        sx = (img.naturalWidth - sw) / 2;
+      } else {
+        sh = img.naturalWidth / targetRatio;
+        sy = (img.naturalHeight - sh) / 2;
+      }
+
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, targetWidth, targetHeight);
+      ctx.drawImage(img, sx, sy, sw, sh, 0, 0, targetWidth, targetHeight);
+      resolve(canvas.toDataURL('image/jpeg', 0.95));
+    };
+    img.src = dataUrl;
+  });
+};
+
 function App() {
   const [apiKey] = useState(VITE_GEMINI_API_KEY);
   const [prompt, setPrompt] = useState('');
@@ -60,6 +95,7 @@ function App() {
   const [error, setError] = useState('');
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [isRemovingWatermark, setIsRemovingWatermark] = useState(false);
+  const [selectedFormat, setSelectedFormat] = useState('square');
 
   const toggleEnhancer = (id) => {
     setActiveEnhancers(prev => 
@@ -108,11 +144,13 @@ function App() {
       type: mimeType,
     }];
 
-    const config = { imageSize: '2K', aspectRatio: '1:1' };
+    const format = FORMAT_PRESETS[selectedFormat];
+    const config = { imageSize: '2K', aspectRatio: format.aspectRatio };
 
     try {
       const imageUrl = await generateImage(apiKey, ENHANCE_PROMPT, enhanceImages, config);
-      setCurrentResult(imageUrl);
+      const finalUrl = format.width ? await resizeToExact(imageUrl, format.width, format.height) : imageUrl;
+      setCurrentResult(finalUrl);
     } catch (err) {
       setError(err.message || 'Enhancement failed.');
     } finally {
@@ -136,11 +174,13 @@ function App() {
       QUALITY: Pixel-Perfect Ultra High Definition (UHD+), 8k resolution, razor-sharp clarity, no artifacts, professional product photography.
     `.trim();
 
-    const config = { imageSize: '2K', aspectRatio: '1:1' };
+    const format = FORMAT_PRESETS[selectedFormat];
+    const config = { imageSize: '2K', aspectRatio: format.aspectRatio };
 
     try {
       const imageUrl = await generateImage(apiKey, WATERMARK_PROMPT, referenceImages, config);
-      setCurrentResult(imageUrl);
+      const finalUrl = format.width ? await resizeToExact(imageUrl, format.width, format.height) : imageUrl;
+      setCurrentResult(finalUrl);
     } catch (err) {
       setError(err.message || 'Watermark removal failed.');
     } finally {
@@ -175,14 +215,16 @@ function App() {
     setError('');
     setShowOriginal(false);
 
+    const format = FORMAT_PRESETS[selectedFormat];
     const config = {
       imageSize: '2K',
-      aspectRatio: '1:1'
+      aspectRatio: format.aspectRatio
     };
 
     try {
       const imageUrl = await generateImage(apiKey, finalPrompt, referenceImages, config);
-      setCurrentResult(imageUrl);
+      const finalUrl = format.width ? await resizeToExact(imageUrl, format.width, format.height) : imageUrl;
+      setCurrentResult(finalUrl);
     } catch (err) {
       setError(err.message || 'Engine core failed.');
     } finally {
@@ -301,7 +343,18 @@ function App() {
 
             <div className="action-zone">
               <div className="matrix-format">
-                <button className="on">1:1 SQUARE</button>
+                <button
+                  className={selectedFormat === 'square' ? 'on' : ''}
+                  onClick={() => setSelectedFormat('square')}
+                >
+                  1:1 SQUARE
+                </button>
+                <button
+                  className={selectedFormat === 'banner' ? 'on' : ''}
+                  onClick={() => setSelectedFormat('banner')}
+                >
+                  1200 × 630
+                </button>
               </div>
               <div className="action-buttons">
                 <button
